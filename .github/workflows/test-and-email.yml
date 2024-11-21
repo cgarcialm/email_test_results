@@ -1,0 +1,37 @@
+name: Run Tests and Send Email
+
+on: [push]
+
+jobs:
+  test_and_email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install pytest
+
+      - name: Run tests
+        id: pytest
+        run: pytest > results.log
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.example.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: Test Results
+          to: receiver@example.com
+          from: sender@example.com
+          body: |
+            Test results:
+            ${{ steps.pytest.outputs.result }}
